@@ -1,4 +1,3 @@
-PORYADOK = ["первое", "второе", "третье", "четвёртое", "пятое", "шестое", "седьмое", "восьмое", "девятое"]
 DO = dict()
 PRIMER = ''
 
@@ -31,31 +30,41 @@ def making():
                 if final[op][long] == meen:
                     start = opening.pop(op)
                     end = closing.pop(closing.index(final[op][long] + start))
-                    DO[PORYADOK[len(DO)]] = PRIMER[start + 1:end]
-                    PRIMER = PRIMER.replace(PRIMER[start:end + 1], PORYADOK[len(DO) - 1])  # Замена действий
+                    DO['|' + str(len(DO)) + '|'] = PRIMER[start + 1:end]
+                    PRIMER = PRIMER.replace(PRIMER[start:end + 1], '|' + str(len(DO) - 1) + '|')  # Замена действий
                     flag = 1
                     break
             if flag:
                 break
 
 
+def changing(value):  # Автоматически заменяет знаки
+    new_value = value
+    dct = {
+        ' and ': (' и ', ' ∧ '),
+        ' or ': (' или ', ' ∨ '),
+        ' == ': (' = ', ' ≡ ')
+    }
+    for put, take in dct.items():
+        for get in take:
+            new_value = new_value.replace(get, put) if get in new_value else new_value
+    if ' -> ' in new_value:
+        new_value = new_value.split(' -> ')
+        new_value = f'not {new_value[0]} or {new_value[1]}'
+    if ' → ' in new_value:
+        new_value = new_value.split(' → ')
+        new_value = f'not {new_value[0]} or {new_value[1]}'
+    return new_value
+
 def preps(rest, dct, value):
     new_value = value
     for tri in dct.keys():  # Заменяет предыдущие действия на их результат
         if tri in new_value:
-            new_value = str(new_value.replace(tri, str(dct[tri])))
+            new_value = new_value.replace(tri, str(dct[tri]))
     for letter in rest.keys():  # Заменяет переменные на их значения
         if letter in str(new_value):
-            new_value = str(new_value).replace(letter, str(rest[letter]))
-    # Кусок кода, который мог облегчить мой прошлый урок (автоматические заменяет импликацию, "или" и "и")
-    if 'или' in new_value:
-        new_value = str(new_value).replace('или', 'or')
-    if 'и' in new_value:
-        new_value = str(new_value).replace('и', 'and')
-    if '->' in new_value:
-        new_value = new_value.split(' -> ')
-        new_value = f'not {new_value[0]} or {new_value[1]}'
-    return new_value
+            new_value = new_value.replace(letter, str(rest[letter]))
+    return changing(new_value)
 
 
 def count(do, **rest):  # Вычисления
@@ -68,10 +77,11 @@ def count(do, **rest):  # Вычисления
     return leest
 
 
-def main():
+def sti(primer, only=''):
     global DO
     global PRIMER
-    PRIMER = '(' + input('Введите пример:\n') + ')'
+    DO = dict()
+    PRIMER = '(' + primer.lower() + ')'
     num_of_perem = 0
     if 'x' in PRIMER:
         num_of_perem += 1
@@ -82,16 +92,19 @@ def main():
                 if 'w' in PRIMER:
                     num_of_perem += 1
     making()  # Преобразование
-    print('Нужен вывод целиком или только с определённым ответом',
-          'Введите 0 или 1 если нужен определённый или нажмите "enter" чтобы вывести целиком', sep='\n')
-    inpt = input()
-    if inpt != '' and inpt in '01':
+    if only != '' and only in '01':
         need_smth = True
-        need = int(inpt)
+        need = int(only)
     else:
         need_smth = False
         need = None
-    print('x y z w'[:num_of_perem * 2], '1 2 3 4 5 6 7 8 9'[:len(DO.keys()) * 2 - 1], '\n', sep='  ')
+    first_space = "   "
+    second_space = " "
+    out = ''
+    out += 'x y z w'[:num_of_perem * 2] + "  " + first_space.join([str(i + 1) for i in range(len(DO.keys())) if i < 9])
+    if len(DO.keys()) >= 10:
+        out += second_space + second_space.join([str(i + 1) for i in range(len(DO.keys())) if i >= 9])
+    out += '\n'
     for x in range(2):
         for y in range(2):
             if num_of_perem > 2:
@@ -100,15 +113,13 @@ def main():
                         for w in range(2):
                             sleest = count(DO, x=x, y=y, z=z, w=w)
                             if not need_smth or (need_smth and int(sleest[-1]) == need):
-                                print(f'{x} {y} {z} {w} ', *sleest)
+                                out += f"{x} {y} {z} {w}  " + first_space.join(sleest) + "\n"
                     else:
                         sleest = count(DO, x=x, y=y, z=z)
                         if not need_smth or (need_smth and int(sleest[-1]) == need):
-                            print(f'{x} {y} {z} ', *sleest)
+                            out += f"{x} {y} {z}  " + first_space.join(sleest) + "\n"
             else:
                 sleest = count(DO, x=x, y=y)
                 if not need_smth or (need_smth and int(sleest[-1]) == need):
-                    print(f'{x} {y} ', *sleest)
-
-
-main()
+                    out += f"{x} {y}  " + first_space.join(sleest) + "\n"
+    return out
