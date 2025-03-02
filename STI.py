@@ -69,7 +69,7 @@ def preps(rest, dct, value):
     return changing(new_value)
 
 
-def count(do, **rest):  # Вычисления
+def make_count(do, **rest):  # Вычисления
     leest = list()
     dct = do.copy()
     for key in dct.keys():
@@ -118,19 +118,19 @@ def sti(primer, only=''):
                     for z in range(2):
                         if num_of_perem > 3:
                             for w in range(2):
-                                sleest = count(DO, x=x, y=y, z=z, w=w)
+                                sleest = make_count(DO, x=x, y=y, z=z, w=w)
                                 if not need_smth or (need_smth and int(sleest[-1]) == need):
                                     out += f"{x} {y} {z} {w}  " + first_space.join(sleest) + "\n"
                         else:
-                            sleest = count(DO, x=x, y=y, z=z)
+                            sleest = make_count(DO, x=x, y=y, z=z)
                             if not need_smth or (need_smth and int(sleest[-1]) == need):
                                 out += f"{x} {y} {z}  " + first_space.join(sleest) + "\n"
                 else:
-                    sleest = count(DO, x=x, y=y)
+                    sleest = make_count(DO, x=x, y=y)
                     if not need_smth or (need_smth and int(sleest[-1]) == need):
                         out += f"{x} {y}  " + first_space.join(sleest) + "\n"
         else:
-            sleest = count(DO, x=x)
+            sleest = make_count(DO, x=x)
             if not need_smth or (need_smth and int(sleest[-1]) == need):
                 out += f"{x}  " + first_space.join(sleest) + "\n"
     return out
